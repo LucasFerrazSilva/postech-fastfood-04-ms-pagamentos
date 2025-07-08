@@ -1,18 +1,15 @@
 version: '3.9'
 services:
-  postgres:
-    image: postgres:17
-    container_name: postgres_dev_network_pagamentos
+  mongodb:
+    image: 'mongo:latest'
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      - 'MONGO_INITDB_DATABASE=mydatabase'
+      - 'MONGO_INITDB_ROOT_PASSWORD=secret'
+      - 'MONGO_INITDB_ROOT_USERNAME=root'
     ports:
-      - "5432:5432"
+      - '27017'
     volumes:
-      - postgres_data_pagamentos:/var/lib/postgresql/data
-    networks:
-      - postgres_dev_network
+      - 'mongodb_data:/data/db'
   localstack:
     image: localstack/localstack:latest
     container_name: localstack-sqs
@@ -27,8 +24,5 @@ services:
       - "localstack_data:/var/lib/localstack"
 
 volumes:
-  postgres_data_pagamentos:
   localstack_data:
-
-networks:
-  postgres_dev_network:
+  mongodb_data:
