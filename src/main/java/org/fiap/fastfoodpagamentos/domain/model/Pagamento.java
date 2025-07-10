@@ -11,7 +11,7 @@ import org.fiap.fastfoodpagamentos.domain.enumeration.PagamentoStatus;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Pagamento {
-    private Integer id;
+    private String id;
     private String idExterno;
     private Integer pedidoId;
     private PagamentoStatus status;

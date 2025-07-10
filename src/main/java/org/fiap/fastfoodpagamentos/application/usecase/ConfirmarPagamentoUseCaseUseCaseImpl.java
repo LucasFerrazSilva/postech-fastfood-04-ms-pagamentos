@@ -1,6 +1,5 @@
 package org.fiap.fastfoodpagamentos.application.usecase;
 
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.fiap.fastfoodpagamentos.application.port.driven.ManipularPagamento;
 import org.fiap.fastfoodpagamentos.application.port.driven.PublicarMensagemPagamento;
@@ -9,6 +8,7 @@ import org.fiap.fastfoodpagamentos.domain.enumeration.PagamentoStatus;
 import org.fiap.fastfoodpagamentos.domain.exception.ImpossivelConfirmarPagamentoException;
 import org.fiap.fastfoodpagamentos.domain.model.Pagamento;
 import org.fiap.fastfoodpagamentos.infrastructure.adapter.messaging.ResultadoPagamentoDTO;
+import org.springframework.transaction.annotation.Transactional;
 
 @AllArgsConstructor
 public class ConfirmarPagamentoUseCaseUseCaseImpl implements ConfirmarPagamentoUseCase {
@@ -26,10 +26,11 @@ public class ConfirmarPagamentoUseCaseUseCaseImpl implements ConfirmarPagamentoU
     }
 
     pagamento.setStatus(PagamentoStatus.REALIZADO);
-    pagamento = manipularPagamento.alterarPagamento(pagamento);
 
     publicarMensagemPagamento.send(
-        new ResultadoPagamentoDTO(pagamento.getPedidoId(), pagamento.getStatus()));
+            new ResultadoPagamentoDTO(pagamento.getPedidoId(), pagamento.getStatus()));
+
+    pagamento = manipularPagamento.alterarPagamento(pagamento);
 
     return pagamento;
   }
