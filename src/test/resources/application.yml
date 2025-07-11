@@ -1,0 +1,28 @@
+app:
+  name: FastFood
+  mercadopagotoken: ${MERCADO_PAGO_TOKEN}
+  url: ${APPLICATION_URL:http://127.0.0.1:8080}
+  fila-pagamentos: ${ENDERECO_FILA_PAGAMENTOS:https://localhost.localstack.cloud:4566/000000000000/fila-pagamentos}
+spring:
+  application:
+    name: fastfood-pagamentos
+  config:
+    import: optional:file:run/test.properties
+  data:
+    mongodb:
+      uri: mongodb://fastfood_pagamentos_user:fastfood_pagamentos_password@localhost:27017/fastfood_pagamentos_test
+  docker:
+    compose:
+      file: ./run/docker-compose-test.yml
+      enabled: true
+      skip:
+        in-tests: false
+  cloud:
+    aws:
+      endpoint: http://localhost:4566
+      region:
+        static: sa-east-1
+      credentials:
+        access-key: test
+        secret-key: test
+        session-token: test

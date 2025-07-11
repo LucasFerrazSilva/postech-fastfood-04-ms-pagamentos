@@ -15,7 +15,7 @@ import org.hibernate.validator.constraints.br.CPF;
 @AllArgsConstructor
 public class Cliente {
     private Integer id;
-    String nome;
-    String email;
-    String cpf;
+    private String nome;
+    private String email;
+    private String cpf;
 }
