@@ -1,0 +1,28 @@
+version: '3.9'
+services:
+  mongodb_test:
+    image: 'mongo:latest'
+    environment:
+      MONGO_INITDB_DATABASE: fastfood_pagamentos_test
+      MONGO_INITDB_ROOT_USERNAME: fastfood_pagamentos_user
+      MONGO_INITDB_ROOT_PASSWORD: fastfood_pagamentos_password
+    ports:
+      - '27017:27017'
+    volumes:
+      - 'mongodb_test_data:/data/db'
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack-sqs
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=sqs
+      - DEBUG=1
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "localstack_data:/var/lib/localstack"
+
+volumes:
+  localstack_data:
+  mongodb_test_data:
