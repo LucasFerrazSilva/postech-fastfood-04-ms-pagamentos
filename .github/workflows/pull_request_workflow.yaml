@@ -72,7 +72,7 @@ jobs:
         run: |
           kubectl create secret generic db-credentials \
             --from-literal=MONGODB_URI="${{ secrets.MONGODB_URI }}" \
-            -n fastfood-pagamentos \
+            -n fastfood \
             --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Create aws secrets from GitHub
@@ -84,7 +84,7 @@ jobs:
             --from-literal=AWS_REGION="us-east-1" \
             --from-literal=ENDERECO_FILA_PAGAMENTOS="${{ secrets.ENDERECO_FILA_PAGAMENTOS }}" \
             --from-literal=APPLICATION_URL="${{ secrets.APPLICATION_URL }}" \
-            -n fastfood-pagamentos \
+            -n fastfood \
             --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Deploy mercado pago secret
@@ -99,8 +99,8 @@ jobs:
 
       - name: Verify deployment
         run: |
-          kubectl rollout status deployment/fastfood-pagamentos-app-deployment -n fastfood-pagamentos
+          kubectl rollout status deployment/fastfood-pagamentos-app-deployment -n fastfood
 
       - name: Verify service
         run: |
-          kubectl get svc fastfood-pagamentos-app -n fastfood-pagamentos
+          kubectl get svc fastfood-pagamentos-app -n fastfood
