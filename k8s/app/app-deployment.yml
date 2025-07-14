@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastfood-pagamentos-app-deployment
+  namespace: fastfood
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: fastfood-pagamentos-app
+  template:
+    metadata:
+      labels:
+        app: fastfood-pagamentos-app
+    spec:
+      containers:
+        - name: fastfood-pagamentos-app
+          image: ${DOCKER_USERNAME}/fastfood-pagamentos:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: MERCADO_PAGO_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: mercado-pago-credentials
+                  key: MERCADO_PAGO_TOKEN
+            - name: AWS_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: AWS_ACCESS_KEY
+            - name: AWS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: AWS_SECRET_KEY
+            - name: AWS_SESSION_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: AWS_SESSION_TOKEN
+            - name: AWS_ENDPOINT
+              value: ''
+            - name: AWS_REGION
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: AWS_REGION
+            - name: ENDERECO_FILA_PAGAMENTOS
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: ENDERECO_FILA_PAGAMENTOS
+            - name: APPLICATION_URL
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: APPLICATION_URL
+            - name: MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: MONGODB_URI

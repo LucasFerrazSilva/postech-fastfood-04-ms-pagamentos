@@ -36,3 +36,71 @@ jobs:
       - name: Push Docker images
         run: |
           docker push ${{ secrets.DOCKER_USERNAME }}/fastfood_pagamentos:latest
+
+  deploy-on-eks:
+    needs: push_to_registry
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-east-1
+
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --name eks-cluster --region us-east-1
+
+      - name: Deploy namespace
+        run: kubectl apply -f k8s/namespace.yml
+
+      - name: Create database secrets from GitHub
+        run: |
+          kubectl create secret generic db-credentials \
+            --from-literal=MONGODB_URI="${{ secrets.MONGODB_URI }}" \
+            -n fastfood-pagamentos \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Create aws secrets from GitHub
+        run: |
+          kubectl create secret generic aws-credentials \
+            --from-literal=AWS_ACCESS_KEY="${{ secrets.AWS_ACCESS_KEY }}" \
+            --from-literal=AWS_SECRET_KEY="${{ secrets.AWS_SECRET_KEY }}" \
+            --from-literal=AWS_SESSION_TOKEN="${{ secrets.AWS_SESSION_TOKEN }}" \
+            --from-literal=AWS_REGION="us-east-1" \
+            --from-literal=ENDERECO_FILA_PAGAMENTOS="${{ secrets.ENDERECO_FILA_PAGAMENTOS }}" \
+            --from-literal=APPLICATION_URL="${{ secrets.APPLICATION_URL }}" \
+            -n fastfood-pagamentos \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Deploy mercado pago secret
+        run: kubectl apply -f k8s/secrets/mercado-pago-credentials.yml
+
+      - name: Prepare deployment
+        run: |
+          sed -i "s|\${DOCKER_USERNAME}|${{ secrets.DOCKER_USERNAME }}|g" k8s/app/app-deployment.yml
+
+      - name: Deploy app
+        run: kubectl apply -f k8s/app/
+
+      - name: Verify deployment
+        run: |
+          kubectl rollout status deployment/fastfood-pagamentos-app-deployment -n fastfood-pagamentos
+
+      - name: Verify service
+        run: |
+          kubectl get svc fastfood-pagamentos-app -n fastfood-pagamentos
