@@ -1,5 +1,6 @@
 package org.fiap.fastfoodpagamentos.infrastructure.adapter.messaging;
 
+import com.google.gson.Gson;
 import io.awspring.cloud.sqs.operations.SqsTemplate;
 import lombok.RequiredArgsConstructor;
 import org.fiap.fastfoodpagamentos.application.port.driven.PublicarMensagemPagamento;
@@ -14,7 +15,9 @@ public class FilaPagamentosProducer implements PublicarMensagemPagamento {
     private final SqsTemplate sqsTemplate;
 
     public void send(ResultadoPagamentoDTO resultadoPagamentoDTO) {
-        sqsTemplate.send(filaPagamentos, resultadoPagamentoDTO);
+        String json = new Gson().toJson(resultadoPagamentoDTO);
+
+        sqsTemplate.send(filaPagamentos, json);
     }
 
 }
